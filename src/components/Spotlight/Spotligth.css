@@ -586,3 +586,89 @@
     gap: 16px;
   }
 }
+
+/* Premium translucent overlays: let the cinematic frame remain visible */
+.pathways-section,
+.curriculum-section,
+.features-section,
+.enroll-section {
+  background: rgba(8, 11, 18, 0.10);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  border-color: rgba(255, 255, 255, 0.10);
+}
+
+.pathway-card,
+.course-card,
+.pillars-card,
+.exam-highlights-card,
+.feature-item,
+.faq-item,
+.enroll-card {
+  background: rgba(13, 19, 31, 0.34);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.section-header-center .section-subtitle,
+.pathway-desc,
+.course-desc,
+.feature-desc,
+.pillar-item p {
+  color: rgba(238, 243, 250, 0.82);
+}
+
+@media (max-width: 768px) {
+  .cinematic-fixed-background { background: #080b12; }
+  .cinematic-canvas { object-fit: contain; }
+  .cinematic-hero-section {
+    min-height: calc(100svh - 72px);
+    padding: 48px 0 64px;
+  }
+  .cinematic-hero-title {
+    font-size: clamp(2rem, 8vw, 2.7rem);
+    line-height: 1.12;
+  }
+  .cinematic-hero-desc {
+    max-width: 34rem;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 0.96rem;
+  }
+  .cinematic-cta-group {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .cinematic-cta-group .btn {
+    width: 100%;
+    white-space: normal;
+  }
+  .cinematic-trust-strip { gap: 8px; }
+  .trust-pill-mini { font-size: 0.72rem; }
+  .pathways-section,
+  .curriculum-section,
+  .features-section,
+  .enroll-section {
+    background: rgba(8, 11, 18, 0.24);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+  .pathway-card,
+  .course-card,
+  .pillars-card,
+  .exam-highlights-card,
+  .feature-item,
+  .faq-item,
+  .enroll-card {
+    background: rgba(13, 19, 31, 0.58);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cinematic-scroll-prompt { animation: none; }
+  .glass-card, .pathway-link, .course-img { transition: none; }
+}
