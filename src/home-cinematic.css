@@ -1,0 +1,214 @@
+/* Pro2Deutsch cinematic Home choreography — scoped to the Home route's existing sections. */
+.spotlight-wrapper,
+.features-section,
+.faq-section,
+.enroll-section {
+  isolation: isolate;
+}
+
+/* Keep the canvas visible: only localized content surfaces receive a tint. */
+.cinematic-vignette {
+  background:
+    linear-gradient(90deg, rgba(5, 8, 14, .30) 0%, rgba(5, 8, 14, .06) 44%, transparent 72%),
+    linear-gradient(180deg, rgba(5, 8, 14, .10), transparent 22%, transparent 78%, rgba(5, 8, 14, .18));
+}
+.cinematic-light-glow { opacity: .45; }
+
+.cinematic-hero-section { justify-content: flex-start; }
+.cinematic-hero-section .container { width: min(100% - 48px, 1240px); }
+.hero-content-inner {
+  max-width: 590px;
+  padding: clamp(20px, 3vw, 38px);
+  margin-left: 0;
+  border-left: 1px solid rgba(245,166,35,.45);
+  background: linear-gradient(90deg, rgba(7,11,19,.34), rgba(7,11,19,.08) 76%, transparent);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+.cinematic-hero-title { text-wrap: balance; text-shadow: 0 3px 22px rgba(0,0,0,.48); }
+.cinematic-hero-desc { text-shadow: 0 2px 14px rgba(0,0,0,.55); }
+
+/* Alternating editorial section rhythm */
+.pathways-section,
+.curriculum-section,
+.features-section,
+.enroll-section {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: rgba(255,255,255,.08);
+}
+.pathways-section { padding: clamp(72px, 9vw, 124px) 0; }
+.pathways-section .section-header-center {
+  max-width: 650px;
+  margin: 0 0 44px auto;
+  text-align: right;
+}
+.pathways-grid {
+  grid-template-columns: 1.08fr .92fr 1.08fr;
+  align-items: stretch;
+  gap: clamp(14px, 2vw, 26px);
+}
+.pathway-card,
+.course-card,
+.pillars-card,
+.exam-highlights-card,
+.feature-item,
+.faq-item,
+.enroll-card {
+  background: rgba(10, 15, 25, .18) !important;
+  border: 1px solid rgba(255,255,255,.16);
+  box-shadow: 0 16px 42px rgba(0,0,0,.14);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: transform .35s ease, border-color .35s ease, background .35s ease;
+}
+.pathway-card:nth-child(2) { transform: translateY(34px); }
+.pathway-card:hover,
+.course-card:hover,
+.feature-item:hover {
+  transform: translateY(-7px);
+  border-color: rgba(245,166,35,.42);
+  background: rgba(10,15,25,.28) !important;
+}
+.pathway-card:nth-child(2):hover { transform: translateY(24px); }
+
+.curriculum-section { padding: clamp(72px, 9vw, 124px) 0; }
+.curriculum-section .section-header-center {
+  max-width: 620px;
+  margin: 0 auto 46px 0;
+  text-align: left;
+}
+.curriculum-grid { grid-template-columns: repeat(4, minmax(0,1fr)); gap: 16px; }
+.course-card { overflow: hidden; }
+.course-media { height: 156px; }
+.course-body { padding: 20px 17px; }
+.curriculum-footer-cta {
+  background: rgba(10,15,25,.18);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.pillars-section { padding: clamp(72px, 9vw, 124px) 0; }
+.pillars-card {
+  grid-template-columns: 1fr 1.1fr;
+  padding: clamp(28px, 5vw, 58px);
+  gap: clamp(28px, 5vw, 64px);
+}
+.pillars-intro { order: 2; max-width: 490px; justify-self: end; }
+.pillars-grid { order: 1; }
+.pillar-item { padding: 16px; border-left: 1px solid rgba(245,166,35,.32); }
+.pillar-item:nth-child(2), .pillar-item:nth-child(4) { transform: translateY(22px); }
+
+/* Features and FAQ use opposing columns to continue the side-to-side rhythm. */
+.features-section { padding: clamp(72px, 9vw, 124px) 0; }
+.exam-highlights-card {
+  grid-template-columns: 1.15fr .85fr;
+  padding: clamp(24px, 4vw, 44px);
+}
+.features-grid { gap: 18px; }
+.feature-item:nth-child(2) { transform: translateY(26px); }
+.feature-item:nth-child(2):hover { transform: translateY(18px); }
+
+.faq-section { padding: clamp(64px, 8vw, 108px) 0; }
+.faq-section .container {
+  display: grid;
+  grid-template-columns: minmax(220px,.72fr) minmax(0,1.28fr);
+  gap: clamp(28px, 6vw, 84px);
+  align-items: start;
+}
+.faq-section .section-header-center {
+  text-align: left;
+  margin: 0;
+  position: sticky;
+  top: 110px;
+}
+.faq-container { max-width: none; }
+.faq-item { border-radius: 16px; }
+
+/* Enrollment: transparent outer panel, legible inner controls. */
+.enroll-section { padding: clamp(72px, 9vw, 120px) 0; }
+.enroll-card {
+  grid-template-columns: .9fr 1.1fr;
+  padding: clamp(24px, 4vw, 48px);
+  gap: clamp(24px, 5vw, 60px);
+}
+.enroll-info { max-width: 470px; }
+.enroll-form-wrapper {
+  background: rgba(9,14,24,.48);
+  border: 1px solid rgba(255,255,255,.20);
+  box-shadow: 0 18px 48px rgba(0,0,0,.18);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+.form-input, .form-select { background: rgba(7,11,19,.72); }
+
+/* Footer retains a subtle dark base while allowing the final frame to show through. */
+.website-footer {
+  background: linear-gradient(180deg, rgba(9,13,22,.76), rgba(7,10,17,.91)) !important;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+@media (max-width: 1100px) {
+  .curriculum-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .pathways-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .pathway-card:nth-child(2) { transform: none; }
+  .pathway-card:nth-child(2):hover { transform: translateY(-7px); }
+}
+@media (max-width: 768px) {
+  .cinematic-vignette {
+    background: linear-gradient(180deg, rgba(5,8,14,.16), transparent 35%, rgba(5,8,14,.14));
+  }
+  .cinematic-hero-section .container { width: min(100% - 32px, 640px); }
+  .hero-content-inner {
+    max-width: 100%;
+    padding: 22px 18px;
+    border-left: 0;
+    border-top: 1px solid rgba(245,166,35,.4);
+    background: linear-gradient(180deg, rgba(7,11,19,.38), rgba(7,11,19,.12));
+  }
+  .pathways-section .section-header-center,
+  .curriculum-section .section-header-center {
+    margin: 0 0 32px;
+    text-align: left;
+  }
+  .pathways-grid { grid-template-columns: 1fr; }
+  .pathway-card:nth-child(2),
+  .pathway-card:nth-child(2):hover,
+  .feature-item:nth-child(2),
+  .feature-item:nth-child(2):hover,
+  .pillar-item:nth-child(2),
+  .pillar-item:nth-child(4) { transform: none; }
+  .curriculum-grid { grid-template-columns: 1fr; }
+  .pillars-card { grid-template-columns: 1fr; }
+  .pillars-intro, .pillars-grid { order: initial; justify-self: stretch; }
+  .pillars-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .exam-highlights-card { grid-template-columns: 1fr; }
+  .features-grid { grid-template-columns: 1fr; }
+  .faq-section .container { display: block; }
+  .faq-section .section-header-center {
+    position: static;
+    margin: 0 0 30px;
+    text-align: left;
+  }
+  .enroll-card { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .pillars-grid { grid-template-columns: 1fr; }
+  .curriculum-footer-cta { padding: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pathway-card, .course-card, .feature-item { transition: none; }
+  .pathway-card:hover, .course-card:hover, .feature-item:hover { transform: none; }
+}
+
+
+.features-section .section-header-center {
+  max-width: 650px;
+  margin: 0 auto 44px 0;
+  text-align: left;
+}
+@media (max-width: 768px) {
+  .features-section .section-header-center { margin: 0 0 32px; }
+}

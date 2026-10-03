@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import Navbar from './components/Navbar/Navbar';
 import './App.css';
 import './premium-pages.css';
+import './home-cinematic.css';
 import Courses from './pages/Courses/Courses';
 import Spotlight from './components/Spotlight/Spotligth';
 import Footer from './components/Footer/Footer';
@@ -18,9 +19,7 @@ import { coursesData } from './data';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
   return null;
 }
 
@@ -33,14 +32,7 @@ function App() {
         <LeadPopup />
         <main className="content">
           <Routes>
-            <Route path="/" element={
-              <>
-                <Spotlight coursesData={coursesData} />
-                <Features />
-                <FAQ />
-                <Enrollment />
-              </>
-            } />
+            <Route path="/" element={<><Spotlight coursesData={coursesData} /><Features /><FAQ /><Enrollment /></>} />
             <Route path="/courses" element={<Courses />} />
             <Route path="/Courses" element={<Courses />} />
             <Route path="/about" element={<About />} />
