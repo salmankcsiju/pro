@@ -114,7 +114,8 @@ function Spotlight({ coursesData = [] }) {
 
     let renderWidth, renderHeight, offsetX, offsetY;
 
-    if (canvasRatio > imgRatio) {
+    // Preserve the complete 16:9 scene on portrait screens; keep cover on landscape.
+    if (canvasRatio < 0.85 || canvasRatio > imgRatio) {
       renderWidth = canvasWidth;
       renderHeight = canvasWidth / imgRatio;
       offsetX = 0;
@@ -127,6 +128,8 @@ function Spotlight({ coursesData = [] }) {
     }
 
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    ctx.fillStyle = '#080b12';
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
     ctx.drawImage(img, offsetX, offsetY, renderWidth, renderHeight);
   }, []);
 

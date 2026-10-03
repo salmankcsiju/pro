@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar/Navbar';
 import './App.css';
+import './premium-pages.css';
 import Courses from './pages/Courses/Courses';
 import Spotlight from './components/Spotlight/Spotligth';
 import Footer from './components/Footer/Footer';
