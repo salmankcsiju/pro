@@ -1,8 +1,8 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar/Navbar';
 import './App.css';
-import Courses from './pages/Courses/Courses'
+import Courses from './pages/Courses/Courses';
 import Spotlight from './components/Spotlight/Spotligth';
 import Footer from './components/Footer/Footer';
 import About from './pages/About/About';
@@ -15,14 +15,22 @@ import CourseDetail from './pages/CoursesDetails/CourseDetail';
 import LeadPopup from './components/LeadPopup/LeadPopup';
 import { coursesData } from './data';
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
 
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <div className="App">
         <Navbar />
         <LeadPopup />
-        <div className="content">
+        <main className="content">
           <Routes>
             <Route path="/" element={
               <>
@@ -32,14 +40,14 @@ function App() {
                 <Enrollment />
               </>
             } />
+            <Route path="/courses" element={<Courses />} />
             <Route path="/Courses" element={<Courses />} />
             <Route path="/about" element={<About />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/enroll" element={<Enrollment />} />
-            <Route path="/course/:id"
-              element={<CourseDetail />} />
+            <Route path="/course/:id" element={<CourseDetail />} />
           </Routes>
-        </div>
+        </main>
         <Footer />
         <WhatsAppWidget />
       </div>

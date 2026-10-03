@@ -1,749 +1,588 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
+/* Spotlight Home Component Styles with Global Scroll-Driven Cinematic Background */
 
-/* Vertical and horizontal spacing fix */
-.spotlight-section {
-    position: relative;
-    overflow: hidden;
-    min-height: 80vh;
-    display: flex;
-    align-items: center;
-    padding: 80px 0 120px;
-    background-color: var(--secondary);
-    /* cream bg */
-    border-radius: 0;
-    margin: 0;
+.spotlight-wrapper {
+  position: relative;
+  width: 100%;
 }
 
-.spotlight-flex {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    gap: 60px;
+/* ==========================================================================
+   GLOBAL CINEMATIC SCROLL-DRIVEN BACKGROUND
+   ========================================================================== */
+.cinematic-fixed-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background-color: var(--bg-main);
 }
 
-/* Image Stack Alignment Fix */
-.image-side {
-    flex: 1;
-    position: relative;
-    height: 600px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+/* HTML5 Canvas Background */
+.cinematic-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  pointer-events: none;
 }
 
-.image-stack {
-    position: relative;
-    width: 100%;
-    height: 100%;
+/* Cinematic Vignette & Ambient Glow to ensure high text contrast */
+.cinematic-vignette {
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(circle at 50% 50%, rgba(10, 14, 23, 0.08) 0%, rgba(10, 14, 23, 0.38) 75%, rgba(8, 11, 18, 0.65) 100%),
+    linear-gradient(180deg, rgba(10, 14, 23, 0.3) 0%, rgba(10, 14, 23, 0.02) 20%, rgba(10, 14, 23, 0.08) 80%, rgba(10, 14, 23, 0.55) 100%);
+  z-index: 2;
+  pointer-events: none;
 }
 
-.stack-img {
-    position: absolute;
-    border-radius: 20px;
-    overflow: hidden;
-    /* Soft shadow instead of intense box shadow */
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+.cinematic-light-glow {
+  position: absolute;
+  bottom: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 75vw;
+  height: 400px;
+  background: radial-gradient(circle, rgba(245, 166, 35, 0.14) 0%, rgba(10, 14, 23, 0) 70%);
+  z-index: 2;
+  pointer-events: none;
 }
 
-.stack-img img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+/* Vertical Cinematic Scrubber Line */
+.cinematic-progress-bar {
+  position: fixed;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 140px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-full);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  pointer-events: none;
 }
 
-/* Clean staggered positions, removing float animation */
-.img-0 {
-    z-index: 3;
-    top: 50%;
-    left: 10%;
-    transform: translateY(-50%);
-    width: 320px;
-    height: 400px;
+.cinematic-progress-fill {
+  width: 100%;
+  background: var(--gradient-gold);
+  border-radius: var(--radius-full);
+  box-shadow: 0 0 12px var(--brand-gold);
+  transition: height 0.08s linear;
 }
 
-.img-1 {
-    z-index: 2;
-    top: 0;
-    right: 0;
-    width: 400px;
-    height: 350px;
+.cinematic-frame-counter {
+  position: absolute;
+  right: 12px;
+  bottom: -24px;
+  font-family: var(--font-heading);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+  letter-spacing: 0.05em;
 }
 
-.img-2 {
-    z-index: 1;
-    bottom: 0;
-    right: 15%;
-    width: 250px;
-    height: 250px;
-    border-radius: 50% 20px 20px 20px;
-    /* Optional quirk for design */
+/* ==========================================================================
+   1. CINEMATIC HERO SECTION
+   ========================================================================== */
+.cinematic-hero-section {
+  position: relative;
+  min-height: calc(100vh - 84px);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 80px 0 120px 0;
+  z-index: 2;
 }
 
-/* Buttons & Dots */
-.tagline {
-    font-family: 'Inter', sans-serif;
-    color: var(--text-muted) !important;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 20px;
+.hero-content-inner {
+  max-width: 840px;
+  text-align: left;
 }
 
-/* Update Main CTA Button */
-.main-cta {
-    margin-top: 30px;
-    padding: 16px 36px !important;
-    font-size: 1.05rem;
+.cinematic-hero-title {
+  font-size: clamp(2.75rem, 5.5vw, 4.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: #ffffff;
+  margin-bottom: 20px;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.7);
 }
 
-.hero-btns {
-    display: flex;
-    gap: 20px;
-    margin-top: 30px;
+.cinematic-hero-desc {
+  font-size: 1.15rem;
+  color: var(--text-primary);
+  line-height: 1.65;
+  max-width: 620px;
+  margin-bottom: 32px;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
 }
 
-.slide-dots {
-    position: absolute;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 12px;
+.cinematic-cta-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
 }
 
-.dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background-color: var(--border-light);
-    cursor: pointer;
-    transition: all 0.3s ease;
+.cinematic-cta-main {
+  padding: 15px 32px;
+  font-size: 1rem;
 }
 
-.dot.active {
-    background: var(--primary);
-    width: 30px;
-    border-radius: 6px;
+.cinematic-trust-strip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
 }
 
-/* Container spacing and alignment fix */
-.container-header {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 16px;
-    z-index: 10;
+.trust-pill-mini {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  background: rgba(14, 19, 30, 0.35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
 }
 
-/* Entrance Animation for each element */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.cinematic-scroll-prompt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-heading);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--brand-gold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-top: 12px;
+  animation: pulsePrompt 2s infinite ease-in-out;
 }
 
-.slide-fade .tagline,
-.slide-fade .slide-title,
-.slide-fade .slide-subtitle,
-.slide-fade .slide-points,
-.slide-fade .slide-footer,
-.slide-fade .hero-btns {
-    animation: fadeInUp 0.8s ease forwards;
-    opacity: 0;
+@keyframes pulsePrompt {
+  0%, 100% { opacity: 0.7; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(3px); }
 }
 
-/* Staggered Entrance */
-.slide-fade .tagline {
-    animation-delay: 0.1s;
+/* Helper Utilities */
+.text-center { text-align: center; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+.mb-2 { margin-bottom: 8px; }
+.mb-3 { margin-bottom: 12px; }
+.mb-4 { margin-bottom: 16px; }
+.mb-6 { margin-bottom: 24px; }
+.justify-center { justify-content: center; }
+.font-bold { font-weight: 700; }
+
+/* ==========================================================================
+   2. THREE PATHWAYS SECTION (Over Cinematic Canvas)
+   ========================================================================== */
+.pathways-section {
+  background: rgba(10, 14, 23, 0.16);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  position: relative;
+  z-index: 2;
+  padding: 100px 0;
 }
 
-.slide-fade .slide-title {
-    animation-delay: 0.2s;
+.pathways-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
 }
 
-.slide-fade .slide-subtitle {
-    animation-delay: 0.3s;
+.pathway-card {
+  padding: 36px 30px;
+  display: flex;
+  flex-direction: column;
 }
 
-.slide-fade .slide-points {
-    animation-delay: 0.4s;
+.pathway-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
 }
 
-.slide-fade .slide-footer {
-    animation-delay: 0.5s;
+.pathway-tag {
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--brand-gold);
 }
 
-.slide-fade .hero-btns {
-    animation-delay: 0.6s;
+.pathway-level {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
 }
 
-/* 2. SPECIFIC TEXT COLORS & SHADOWS */
-.slide-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 5rem;
-    font-weight: 500;
-    color: var(--dark);
-    line-height: 1.05;
-    margin: 0;
-    letter-spacing: -1px;
+.pathway-title {
+  margin-bottom: 14px;
+  color: #ffffff;
+  font-size: 1.45rem;
 }
 
-.slide-subtitle {
-    font-family: 'Inter', sans-serif;
-    font-size: 1.5rem;
-    font-weight: 400;
-    color: var(--text-muted);
-    margin-top: 10px;
-    line-height: 1.4;
+.pathway-desc {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 24px;
 }
 
-.slide-points {
-    margin: 20px 0;
-    padding: 0;
-    list-style: none;
+.pathway-points {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+  flex-grow: 1;
 }
 
-.slide-points li {
-    font-size: 1.1rem;
-    color: var(--text-main);
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-weight: 500;
+.pathway-points li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  line-height: 1.45;
 }
 
-.slide-points li span {
-    color: var(--text-main);
+.pathway-points li svg {
+  flex-shrink: 0;
+  margin-top: 2px;
 }
 
-.slide-footer {
-    font-size: 1.1rem;
-    color: var(--text-muted);
-    max-width: 500px;
-    line-height: 1.6;
-    margin-top: 10px;
+.pathway-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--brand-gold);
+  text-decoration: none;
+  transition: gap var(--transition-fast), color var(--transition-fast);
+  margin-top: auto;
 }
 
-
-
-.german-info {
-    width: 100%;
+.pathway-link:hover {
+  gap: 12px;
+  color: var(--brand-gold-glow);
 }
 
-.info-row {
-    padding: 100px 0;
+/* ==========================================================================
+   3. CURRICULUM BENTO SECTION (Over Cinematic Canvas)
+   ========================================================================== */
+.curriculum-section {
+  position: relative;
+  z-index: 2;
+  padding: 100px 0;
+  background: rgba(10, 14, 23, 0.14);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
-.dark-bg {
-    background: var(--white);
-    color: var(--text-main);
+.curriculum-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 48px;
 }
 
-.light-bg {
-    background: var(--light);
-    color: var(--text-main);
+.course-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
+.course-media {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
 }
 
-.flex-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 80px;
+.course-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-normal);
 }
 
-.reverse .flex-row {
-    flex-direction: row-reverse;
+.course-card:hover .course-img {
+  transform: scale(1.06);
 }
 
-.text-side {
-    flex: 1;
+.course-level-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  backdrop-filter: blur(8px);
 }
 
-.image-side {
-    flex: 1;
-    display: flex;
-    justify-content: center;
+.course-body {
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
-.section-title {
-    font-size: 2.6rem;
-    font-weight: 800;
-    margin-bottom: 30px;
-    color: var(--dark);
-    position: relative;
-    font-family: 'Playfair Display', serif;
+.course-name {
+  font-size: 1.25rem;
+  color: #ffffff;
+  margin-bottom: 10px;
 }
 
-.section-title::after {
-    content: "";
-    width: 60px;
-    height: 4px;
-    background: var(--dark);
-    display: block;
-    margin-top: 15px;
-    border-radius: 2px;
+.course-desc {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  margin-bottom: 18px;
 }
 
-.section-img {
-    width: 100%;
-    max-width: 500px;
-    height: 600px;
-    object-fit: cover;
-    border-radius: 12px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+.course-topics {
+  margin-bottom: 18px;
 }
 
-.approach-intro {
-    font-size: 1.15rem;
-    color: var(--text-muted);
-    margin-bottom: 30px;
+.topics-heading {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
 }
 
-.approach-intro.mt-4 {
-    margin-top: 30px;
+.topics-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
-.benefits-grid {
-    display: grid;
+.topic-pill {
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
+.course-outcome-box {
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(245, 166, 35, 0.04);
+  border: 1px solid var(--border-gold-subtle);
+  margin-bottom: 24px;
+  margin-top: auto;
+}
+
+.outcome-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--brand-gold);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.outcome-text {
+  font-size: 0.82rem;
+  color: var(--text-primary);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.course-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.course-btn {
+  flex: 1;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+}
+
+.course-enroll-btn {
+  padding: 10px 16px;
+  font-size: 0.85rem;
+}
+
+.curriculum-footer-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 36px;
+  border-radius: var(--radius-lg);
+  background: rgba(18, 24, 38, 0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+}
+
+.curriculum-footer-cta p {
+  color: var(--text-primary);
+  font-size: 1.05rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* ==========================================================================
+   4. PILLARS SECTION (Over Cinematic Canvas)
+   ========================================================================== */
+.pillars-section {
+  position: relative;
+  z-index: 2;
+  padding: 100px 0;
+}
+
+.pillars-card {
+  padding: 56px 48px;
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 48px;
+  align-items: center;
+}
+
+.pillars-intro h2 {
+  margin-bottom: 18px;
+  letter-spacing: -0.02em;
+}
+
+.pillars-intro p {
+  margin-bottom: 32px;
+  font-size: 1.05rem;
+}
+
+.pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 28px;
+}
+
+.pillar-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.pillar-num {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--brand-gold);
+  margin-bottom: 8px;
+  opacity: 0.8;
+}
+
+.pillar-item h4 {
+  font-size: 1.15rem;
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+
+.pillar-item p {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+@media (max-width: 1200px) {
+  .curriculum-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-}
-
-.benefit-item {
-    font-size: 1rem;
-    background: var(--white);
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
-}
-
-.benefit-item strong {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 1.15rem;
-    color: var(--dark);
-    font-family: 'Inter', sans-serif;
-}
-
-.target-list {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.target-list li {
-    background: var(--light);
-    padding: 20px;
-    border-radius: 8px;
-    border: 1px solid var(--border-light);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.target-list li:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-    background: var(--white);
-}
-
-.target-list li strong {
-    font-size: 1.15rem;
-    color: var(--dark);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.target-list li p {
-    margin: 8px 0 0 38px;
-    font-size: 1rem;
-    color: var(--text-muted);
-    line-height: 1.5;
-}
-
-.approach-list {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.approach-list li {
-    font-size: 1.15rem;
-    color: var(--dark);
-    padding-left: 35px;
-    position: relative;
-    background: var(--light);
-    padding: 15px 15px 15px 45px;
-    border-radius: 8px;
-    font-weight: 500;
-}
-
-.approach-list li::before {
-    content: "✓";
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--dark);
-    font-weight: 800;
-}
-
-/* Container & Section Base */
-.courses-interactive {
-    padding: 80px 0;
-    background: transparent;
-    overflow: hidden;
-    min-height: 600px;
-    position: relative;
-}
-
-.title-head {
-    text-align: center;
-    margin-bottom: 50px;
-    font-size: 3rem;
-    font-weight: 800;
-    color: var(--black);
-}
-
-/* 1. AUTOMATIC MARQUEE (Moving Left) */
-.course-track.scroll {
-    display: flex;
-    gap: 30px;
-    width: max-content;
-    animation: marqueeMove 15s linear infinite;
-}
-
-@keyframes marqueeMove {
-    0% {
-        transform: translateX(0);
-    }
-
-    100% {
-        transform: translateX(-50%);
-    }
-}
-
-.scroll .course-node {
-    width: 280px;
-    flex-shrink: 0;
-}
-
-.scroll .node-media {
-    height: 180px;
-    border-radius: 12px;
-    overflow: hidden;
-}
-
-.scroll .node-media img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    /* Fix for image scaling */
-}
-
-.scroll .node-info h3 {
-    text-align: center;
-    margin-top: 15px;
-    font-size: 1.1rem;
-}
-
-/* Click Button Overlay */
-.click-overlay {
-    position: relative;
-    /* Changed from absolute */
-    display: flex;
-    justify-content: center;
-    /* Centers the button horizontally */
-    align-items: center;
-    margin-top: 40px;
-    /* Space between the courses and the button */
-    width: 100%;
-    left: 0;
-    transform: none;
-    /* Remove the translate(-50%, -50%) */
-    z-index: 10;
-}
-
-/* Ensure the container doesn't cut off the button */
-.courses-interactive {
-    padding: 80px 0;
-    background: transparent;
-    overflow: hidden;
-    min-height: 700px;
-    /* Increased to accommodate the button below */
-    position: relative;
-}
-
-.click-here-btn {
-    padding: 15px 35px;
-    background: transparent;
-    color: var(--primary);
-    border: 1px solid var(--primary);
-    border-radius: 4px;
-    font-weight: 900;
-    cursor: pointer;
-    box-shadow: 0 0 15px rgba(255, 0, 60, 0.3), inset 0 0 5px rgba(255, 0, 60, 0.1);
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.click-here-btn:hover {
-    transform: scale(1.05);
-    background: var(--primary);
-    color: var(--dark, #050510);
-    box-shadow: 0 0 25px rgba(255, 0, 60, 0.6), 0 0 40px rgba(255, 0, 60, 0.3);
-}
-
-/* 2. THE SICK CIRCLE ANIMATION (Cluster Mode) */
-.course-track.cluster {
-    position: relative;
-    height: 450px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.cluster .course-node {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 140px;
-    height: 140px;
-    margin-top: -70px;
-    /* Centering fix */
-    margin-left: -70px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 4px solid var(--gold);
-
-    /* Perfect Circle Math */
-    --angle: calc(360deg / var(--total) * var(--index));
-    transform: rotate(var(--angle)) translate(180px) rotate(calc(-1 * var(--angle)));
-    transition: all 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.cluster .node-media img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.cluster .node-info {
-    display: none;
-}
-
-/* 3. FINAL GRID SHOW (Standard View) */
-.course-track.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
-    animation: gridFadeIn 0.8s ease forwards;
-}
-
-.grid .course-node {
-    background: #fff;
-    border-radius: 15px;
-    border: 1px solid #eee;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-    overflow: hidden;
-}
-
-.grid .node-media {
-    height: 200px;
-    position: relative;
-}
-
-.grid .node-media img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.grid .node-badge {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    background: var(--red);
-    color: white;
-    padding: 5px 15px;
-    border-radius: 50px;
-    font-size: 0.8rem;
-    font-weight: bold;
-}
-
-.grid .node-info {
-    padding: 25px;
-}
-
-.grid .node-outcome {
-    margin-top: 15px;
-    padding: 12px;
-    background: #fdfaf0;
-    border-left: 4px solid var(--gold);
-    font-size: 0.9rem;
-}
-
-@keyframes gridFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(40px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  }
 }
 
 @media (max-width: 992px) {
-    .spotlight-section {
-        height: auto;
-        padding: 40px 20px;
-    }
+  .cinematic-hero-title {
+    font-size: 2.8rem;
+  }
+  
+  .cinematic-progress-bar {
+    display: none; /* Hide scrubber bar on smaller screens */
+  }
 
-    .spotlight-flex {
-        flex-direction: column;
-        text-align: center;
-        gap: 40px;
-    }
+  .hero-content-inner {
+    max-width: 100%;
+    text-align: center;
+    margin: 0 auto;
+  }
 
-    .container-header {
-        align-items: center;
-        flex: none;
-        width: 100%;
-    }
+  .cinematic-cta-group {
+    justify-content: center;
+  }
 
-    .slide-footer {
-        margin: 10px auto;
-    }
+  .cinematic-trust-strip {
+    justify-content: center;
+  }
 
-    .image-side {
-        flex: none;
-        height: 400px;
-        width: 100%;
-        margin-top: 30px;
-    }
+  .cinematic-scroll-prompt {
+    justify-content: center;
+  }
 
-    .img-0 {
-        width: 250px;
-        height: 320px;
-        left: 5%;
-    }
+  .pathways-grid {
+    grid-template-columns: 1fr;
+  }
 
-    .img-1 {
-        width: 280px;
-        height: 250px;
-    }
-
-    .img-2 {
-        width: 180px;
-        height: 180px;
-        right: 5%;
-    }
-
-    .hero-btns {
-        justify-content: center;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .flex-row,
-    .reverse .flex-row {
-        flex-direction: column;
-        text-align: left;
-        /* Changed from center to left for readability of lists */
-        gap: 40px;
-    }
-
-    .image-side {
-        width: 100%;
-        max-width: 600px;
-        margin: 30px auto 0;
-    }
-
-    .section-title {
-        font-size: 2.2rem;
-        text-align: center;
-    }
-
-    .section-title::after {
-        margin: 15px auto 0;
-    }
-
-    .approach-intro {
-        text-align: center;
-    }
+  .pillars-card {
+    grid-template-columns: 1fr;
+    padding: 36px 24px;
+  }
 }
 
-@media (max-width: 768px) {
-    .spotlight-section {
-        padding: 60px 0 80px;
-    }
+@media (max-width: 640px) {
+  .cinematic-hero-section {
+    padding: 60px 0 80px 0;
+  }
 
-    .slide-title {
-        font-size: 2.5rem;
-    }
+  .cinematic-hero-title {
+    font-size: 2.2rem;
+  }
 
-    .slide-subtitle {
-        font-size: 1.1rem;
-    }
+  .cinematic-hero-desc {
+    font-size: 0.98rem;
+  }
 
-    .image-side {
-        height: 350px;
-    }
+  .curriculum-grid {
+    grid-template-columns: 1fr;
+  }
 
-    .img-0 {
-        width: 80%;
-        max-width: 250px;
-        height: auto;
-        aspect-ratio: 3/4;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
+  .pillars-grid {
+    grid-template-columns: 1fr;
+  }
 
-    .img-1 {
-        display: none;
-    }
-
-    .img-2 {
-        display: none;
-    }
-
-    .course-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .benefits-grid {
-        grid-template-columns: 1fr;
-        max-width: 100%;
-        margin: 0;
-        text-align: left;
-    }
-
-    .section-img {
-        height: 400px;
-        /* Shorter image height on mobile */
-    }
+  .curriculum-footer-cta {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
 }

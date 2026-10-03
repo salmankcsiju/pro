@@ -1,244 +1,537 @@
-import React, { useState, useEffect } from 'react';
-import { spotlightSlides, coursesData } from '../../data';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import ProficiencyTest from '../ProficiencyTest/ProficiencyTest';
 import './Spotligth.css';
-import { Link } from 'react-router-dom';
-import teacher from '../../img/1.avif';
-import university from '../../img/2.avif';
-import clean from '../../img/3.webp';
-import studentsImg from '../../img/A1-b2-1.jpeg';
-import teachingImg from '../../img/speaking1.jpeg';
-import promiseImg from '../../img/struggle1.jpeg';
 
+const TOTAL_FRAMES = 274;
 
-function Spotlight() {
-    // FIXED: Removed duplicate useState declarations
-    const [viewMode, setViewMode] = useState('scroll');
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const [themeColor, setThemeColor] = useState('#0f0f0f');
-    const [isTestOpen, setIsTestOpen] = useState(false);
+// Helper to format frame path: ezgif-frame-001.jpg ... ezgif-frame-274.jpg
+const getFrameUrl = (frameIndex) => {
+  const padded = String(frameIndex).padStart(3, '0');
+  return `/frames/ezgif-frame-001.jpg`.replace('001', padded);
+};
 
-    // German Flag Colors: Black, Red, Gold
-    const flagColors = ['#0f0f0f', '#C00000', '#a4882aa3'];
+function Spotlight({ coursesData = [] }) {
+  const [isTestOpen, setIsTestOpen] = useState(false);
+  const [framesLoadedPercent, setFramesLoadedPercent] = useState(0);
 
-    // 1. Automatic Slider & Theme Change
-    useEffect(() => {
-        if (!spotlightSlides || spotlightSlides.length === 0) return;
+  const canvasRef = useRef(null);
+  const progressFillRef = useRef(null);
+  const frameCounterRef = useRef(null);
+  
+  // Cache for loaded HTMLImageElements: frameNumber -> HTMLImageElement
+  const loadedFramesRef = useRef(new Map());
+  const activeFrameIndexRef = useRef(1);
+  const currentFrameFloatRef = useRef(1);
+  const targetFrameIndexRef = useRef(1);
+  const animFrameIdRef = useRef(null);
 
-        const interval = setInterval(() => {
-            const nextIndex = (currentIndex + 1) % spotlightSlides.length;
-            setCurrentIndex(nextIndex);
+  // Pathways data (Preserved from existing design)
+  const pathways = [
+    {
+      id: 'study',
+      tag: 'Academic Track',
+      level: 'A1 → B2',
+      title: 'Study in Germany',
+      desc: 'Structured curriculum to help you meet university admission criteria, pass language proficiency exams, and study tuition-free at top German universities.',
+      points: ['Public university entrance prep', 'Academic reading & essay writing', 'Goethe & TELC B1/B2 certifications'],
+      cta: 'Explore Study Pathway'
+    },
+    {
+      id: 'career',
+      tag: 'Professional Track',
+      level: 'B1 → B2 Fluency',
+      title: 'Work & Professional Career',
+      desc: 'Designed for IT professionals, engineers, and healthcare workers (nurses & physicians) needing job-ready German for the workplace and licensing.',
+      points: ['German CV & job interview training', 'Workplace emails & meetings', 'Specialized medical/technical vocabulary'],
+      cta: 'Explore Career Pathway'
+    },
+    {
+      id: 'relocate',
+      tag: 'Lifestyle & Relocation',
+      level: 'A1 → B1',
+      title: 'Relocation & Visa Integration',
+      desc: 'Fast-track modules designed for spouse visas, Opportunity Card (Chancenkarte), and immigrants who want everyday conversational confidence in Germany.',
+      points: ['A1 visa requirement guarantee', 'Real-life speaking simulations', 'Cultural norms & official paperwork'],
+      cta: 'Explore Relocation Pathway'
+    }
+  ];
 
-            // Pick a random flag color for the theme
-            const randomColor = flagColors[Math.floor(Math.random() * flagColors.length)];
-            setThemeColor(randomColor);
-        }, 3000);
+  const teachingPillars = [
+    {
+      title: 'Structured Progression',
+      desc: 'Clear CEFR-aligned learning goals for every level. Step-by-step grammar explanations without confusing jargon.'
+    },
+    {
+      title: 'Guided Speaking in Every Class',
+      desc: 'Active verbal practice from Day 1. Break the hesitation barrier with simulated real-world scenarios.'
+    },
+    {
+      title: 'Honest Exam Strategy',
+      desc: 'Timed mock evaluations, speaking drills, and personalized essay corrections for Goethe, TELC, and ÖSD.'
+    },
+    {
+      title: 'Personalized Attention',
+      desc: 'Small batch sizes (6–10 students) ensure every learner receives individual correction and support.'
+    }
+  ];
 
-        return () => clearInterval(interval);
-    }, [currentIndex]);
+  // Draw a frame onto the canvas using "cover" aspect-ratio logic
+  const drawFrame = useCallback((frameNumber) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-    // 2. Intersection Observer for scroll animations
-    useEffect(() => {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active-anim');
-                }
-            });
-        }, { threshold: 0.1 });
+    // Find the requested image or the nearest available loaded frame
+    let img = loadedFramesRef.current.get(frameNumber);
+    if (!img || !img.complete || img.naturalWidth === 0) {
+      // Find nearest loaded frame to prevent any blank canvas or flicker
+      let bestDiff = Infinity;
+      let fallbackImg = null;
+      for (const [idx, loadedImg] of loadedFramesRef.current.entries()) {
+        if (loadedImg && loadedImg.complete && loadedImg.naturalWidth > 0) {
+          const diff = Math.abs(idx - frameNumber);
+          if (diff < bestDiff) {
+            bestDiff = diff;
+            fallbackImg = loadedImg;
+          }
+        }
+      }
+      img = fallbackImg;
+    }
 
-        const elements = document.querySelectorAll('.container-header, .section-title, .course-node');
-        elements.forEach(el => observer.observe(el));
+    if (!img || !img.complete || img.naturalWidth === 0) return;
 
-        return () => observer.disconnect();
-    }, [currentIndex, viewMode]);
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
+    const imgWidth = img.naturalWidth;
+    const imgHeight = img.naturalHeight;
 
-    if (!coursesData || !spotlightSlides) return <h1 className="loading">Loading Pro2Deutsch...</h1>;
+    // Calculate 'cover' fit
+    const imgRatio = imgWidth / imgHeight;
+    const canvasRatio = canvasWidth / canvasHeight;
 
-    const slide = spotlightSlides[currentIndex];
-    const currentBgImage = slide?.img?.[0];
+    let renderWidth, renderHeight, offsetX, offsetY;
 
-    const handleInitialClick = () => {
-        setViewMode('cluster');
-        setTimeout(() => setViewMode('grid'), 2000);
+    if (canvasRatio > imgRatio) {
+      renderWidth = canvasWidth;
+      renderHeight = canvasWidth / imgRatio;
+      offsetX = 0;
+      offsetY = (canvasHeight - renderHeight) / 2;
+    } else {
+      renderHeight = canvasHeight;
+      renderWidth = canvasHeight * imgRatio;
+      offsetX = (canvasWidth - renderWidth) / 2;
+      offsetY = 0;
+    }
+
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    ctx.drawImage(img, offsetX, offsetY, renderWidth, renderHeight);
+  }, []);
+
+  // Set canvas resolution handling devicePixelRatio
+  const resizeCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2); // Cap at 2 for performance
+    const rect = canvas.getBoundingClientRect();
+    const targetW = Math.round(rect.width * dpr);
+    const targetH = Math.round(rect.height * dpr);
+    
+    if (canvas.width !== targetW || canvas.height !== targetH) {
+      canvas.width = targetW;
+      canvas.height = targetH;
+      drawFrame(activeFrameIndexRef.current);
+    }
+  }, [drawFrame]);
+
+  // PROGRESSIVE PRELOAD ENGINE:
+  // Phase 1: Frame 1 immediately
+  // Phase 2: Keyframes distributed across 274 timeline
+  // Phase 3: Background fill of remaining frames during idle time
+  useEffect(() => {
+    let isCancelled = false;
+    let loadedCount = 0;
+
+    const loadSingleImage = (index) => {
+      if (loadedFramesRef.current.has(index)) return Promise.resolve();
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.src = getFrameUrl(index);
+        img.onload = () => {
+          if (!isCancelled) {
+            loadedFramesRef.current.set(index, img);
+            loadedCount++;
+            setFramesLoadedPercent(Math.round((loadedCount / TOTAL_FRAMES) * 100));
+            // If this is frame 1 and it's the first draw, render immediately
+            if (index === 1 && activeFrameIndexRef.current === 1) {
+              drawFrame(1);
+            }
+          }
+          resolve();
+        };
+        img.onerror = () => {
+          resolve();
+        };
+      });
     };
 
-    return (
-        <div className="page-wrapper">
-            {/* --- SPOTLIGHT SECTION --- */}
-            <section className="spotlight-section">
-                <div className="container spotlight-flex">
-                    {/* Left Side: Content */}
-                    <div className="container-header slide-fade" key={`content-${currentIndex}`}>
-                        <span className="tagline">
-                            {slide.tagline}
-                        </span>
-                        <h1 className="slide-title">{slide.title}</h1>
-                        <h2 className="slide-subtitle">{slide.subtitle}</h2>
+    // 1. Load First Frame Instantly
+    loadSingleImage(1).then(() => {
+      if (isCancelled) return;
+      resizeCanvas();
 
-                        <ul className="slide-points">
-                            {slide.points.map((point, i) => (
-                                <li key={i}><span>✔</span> {point}</li>
-                            ))}
-                        </ul>
+      // 2. Preload Keyframes (every 3rd frame for immediate responsive scrub)
+      const keyframes = [];
+      const step = window.innerWidth < 768 ? 4 : 3;
+      for (let i = 1; i <= TOTAL_FRAMES; i += step) {
+        if (i !== 1) keyframes.push(i);
+      }
+      if (!keyframes.includes(TOTAL_FRAMES)) keyframes.push(TOTAL_FRAMES);
 
-                        {slide.footer && <p className="slide-footer">{slide.footer}</p>}
+      // Batch load keyframes in chunks of 8
+      const loadBatch = async (items, batchSize) => {
+        for (let i = 0; i < items.length; i += batchSize) {
+          if (isCancelled) break;
+          const chunk = items.slice(i, i + batchSize);
+          await Promise.all(chunk.map(idx => loadSingleImage(idx)));
+        }
+      };
 
-                        <div className="hero-btns">
-                            <button className="btn btn-primary main-cta">
-                                {slide.buttonText} &rarr;
-                            </button>
-                            <button className="btn btn-secondary-outline test-btn" onClick={() => setIsTestOpen(true)}>
-                                Check My Level Now
-                            </button>
-                        </div>
-                    </div>
+      loadBatch(keyframes, 8).then(() => {
+        if (isCancelled) return;
+        // 3. Background fill of all remaining intermediate frames
+        const remaining = [];
+        for (let i = 1; i <= TOTAL_FRAMES; i++) {
+          if (!loadedFramesRef.current.has(i)) {
+            remaining.push(i);
+          }
+        }
+        loadBatch(remaining, 6);
+      });
+    });
 
-                    {/* Right Side: Clean Image Stack */}
-                    <div className="image-side">
-                        <div className="image-stack" key={`img-${currentIndex}`}>
-                            {slide.img && slide.img.map((imageSource, idx) => (
-                                <div key={idx} className={`stack-img img-${idx}`}>
-                                    <img src={imageSource} alt="German Coaching" />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
+    return () => {
+      isCancelled = true;
+    };
+  }, [drawFrame, resizeCanvas]);
 
-                <div className="slide-dots">
-                    {spotlightSlides.map((_, i) => (
-                        <div
-                            key={i}
-                            className={`dot ${i === currentIndex ? 'active' : ''}`}
-                            onClick={() => setCurrentIndex(i)}
-                        />
-                    ))}
-                </div>
-            </section>
+  // Window Resize Listener
+  useEffect(() => {
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    return () => window.removeEventListener('resize', resizeCanvas);
+  }, [resizeCanvas]);
 
-            <section className="german-info">
-                <div className="info-row dark-bg">
-                    <div className="container flex-row">
-                        <div className="text-side">
-                            <h2 className="section-title">Who We Help</h2>
-                            <ul className="target-list">
-                                <li>
-                                    <strong><span className="emoji">👨‍🎓</span> Students Planning to Study in Germany</strong>
-                                    <p>From beginner to B2 certification with structured preparation.</p>
-                                </li>
-                                <li>
-                                    <strong><span className="emoji">💼</span> Working Professionals</strong>
-                                    <p>Flexible batches designed for busy schedules.</p>
-                                </li>
-                                <li>
-                                    <strong><span className="emoji">⚕️</span> Healthcare & Technical Professionals</strong>
-                                    <p>Focused language training aligned with professional communication needs.</p>
-                                </li>
-                                <li>
-                                    <strong><span className="emoji">🎯</span> Dedicated Learners</strong>
-                                    <p>Anyone who wants serious, guided German training in a friendly environment.</p>
-                                </li>
-                            </ul>
-                            <p className="approach-intro mt-4"><em>No matter your background, we meet you at your current level and help you move forward confidently.</em></p>
-                        </div>
-                        <div className="image-side">
-                            <img src={studentsImg} alt="Students learning" className="section-img" />
-                        </div>
-                    </div>
-                </div>
+  // GLOBAL SCROLL SCRUBBING: Maps page scroll through Hero down to Footer across 274 frames
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY || window.pageYOffset;
+      const viewportHeight = window.innerHeight;
+      const docHeight = document.documentElement.scrollHeight;
+      const footer = document.querySelector('.website-footer') || document.querySelector('.site-footer');
+      const footerHeight = footer ? footer.offsetHeight : 450;
 
-                <div className="info-row light-bg reverse">
-                    <div className="container flex-row">
-                        <div className="text-side">
-                            <h2 className="section-title">Our Teaching Approach</h2>
-                            <p className="approach-intro">We believe language learning should be:</p>
-                            <div className="benefits-grid">
-                                <div className="benefit-item">
-                                    <strong>Clear:</strong> Grammar concepts are explained in a logical, easy-to-understand way.
-                                </div>
-                                <div className="benefit-item">
-                                    <strong>Practical:</strong> Speaking exercises simulate real-life conversations and exam situations.
-                                </div>
-                                <div className="benefit-item">
-                                    <strong>Encouraging:</strong> Mistakes are part of learning — we correct with guidance, not pressure.
-                                </div>
-                                <div className="benefit-item">
-                                    <strong>Goal-Oriented:</strong> Each level prepares you properly for the next, including exam readiness.
-                                </div>
-                            </div>
-                        </div>
-                        <div className="image-side">
-                            <img src={teachingImg} alt="Teaching approach" className="section-img" />
-                        </div>
-                    </div>
-                </div>
+      // Scrollable distance before the footer is fully in view
+      const totalScrollableDistance = Math.max(1, docHeight - viewportHeight - footerHeight);
+      const rawProgress = Math.max(0, Math.min(1, scrollY / totalScrollableDistance));
 
-                <div className="info-row dark-bg">
-                    <div className="container flex-row">
-                        <div className="text-side">
-                            <h2 className="section-title">Our Promise</h2>
-                            <ul className="approach-list">
-                                <li>Honest guidance</li>
-                                <li>Clear communication</li>
-                                <li>Consistent support</li>
-                                <li>Structured progression</li>
-                                <li>A respectful and motivating classroom environment</li>
-                            </ul>
-                            <p className="approach-intro mt-4"><em>We are not just teaching a language — we are helping you prepare for an important life step.</em></p>
-                        </div>
-                        <div className="image-side">
-                            <img src={promiseImg} alt="Our promise" className="section-img" />
-                        </div>
-                    </div>
-                </div>
-            </section>
+      if (progressFillRef.current) {
+        progressFillRef.current.style.height = `${Math.round(rawProgress * 100)}%`;
+      }
 
-            {/* ... inside your return ... */}
-            <section className={`courses-interactive ${viewMode}`}>
-                <div className="container">
-                    <h2 className="title-head">Our Courses</h2>
+      // Map 0% = Frame 1, 100% = Frame 274
+      const targetFrame = Math.max(1, Math.min(TOTAL_FRAMES, Math.floor(rawProgress * (TOTAL_FRAMES - 1)) + 1));
+      targetFrameIndexRef.current = targetFrame;
+    };
 
-                    <div
-                        className={`course-track ${viewMode}`}
-                        style={{ '--total': coursesData.length }}
-                    >
-                        {/* Duplicated data for marquee */}
-                        {(viewMode === 'scroll' ? [...coursesData, ...coursesData] : coursesData).map((course, index) => (
-                            <Link to={`/course/${course.id}`} className="course-node" key={index} style={{ '--index': index, textDecoration: 'none', color: 'inherit' }}>
-                                <div className="node-media">
-                                    <img src={course.image} alt={course.level} />
-                                    {viewMode === 'grid' && <span className="node-badge">{course.level}</span>}
-                                </div>
-                                <div className="node-info">
-                                    <h3>{course.name}</h3>
-                                    {viewMode === 'grid' && (
-                                        <div className="node-details">
-                                            <p>{course.description}</p>
-                                            <div className="node-outcome">
-                                                <strong>Outcome:</strong> {course.outcome}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll, { passive: true });
+    handleScroll();
 
-                    {/* MOVE THIS BELOW THE TRACK */}
-                    {viewMode === 'scroll' && (
-                        <div className="click-overlay">
-                            <button className="click-here-btn" onClick={handleInitialClick}>
-                                CLICK HERE
-                            </button>
-                        </div>
-                    )}
-                </div>
-            </section>
+    // Lerp animation loop for smooth cinematic scrubbing without sudden jumps
+    const renderLoop = () => {
+      const currentFloat = currentFrameFloatRef.current;
+      const target = targetFrameIndexRef.current;
+      const diff = target - currentFloat;
 
-            {isTestOpen && <ProficiencyTest onClose={() => setIsTestOpen(false)} />}
+      if (Math.abs(diff) > 0.001) {
+        // Interpolation factor 0.11 for smooth cinematic momentum
+        const factor = 0.11;
+        let nextFloat = currentFloat + diff * factor;
+
+        // Snapping threshold when very close to target so it never hangs or mismatches
+        if (Math.abs(target - nextFloat) < 0.15) {
+          nextFloat = target;
+        }
+
+        currentFrameFloatRef.current = nextFloat;
+        const displayFrame = Math.round(nextFloat);
+
+        if (displayFrame !== activeFrameIndexRef.current) {
+          activeFrameIndexRef.current = displayFrame;
+          drawFrame(displayFrame);
+
+          if (frameCounterRef.current) {
+            frameCounterRef.current.textContent = `Frame ${displayFrame}/${TOTAL_FRAMES}`;
+          }
+        }
+      }
+
+      animFrameIdRef.current = requestAnimationFrame(renderLoop);
+    };
+
+    animFrameIdRef.current = requestAnimationFrame(renderLoop);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+      if (animFrameIdRef.current) {
+        cancelAnimationFrame(animFrameIdRef.current);
+      }
+    };
+  }, [drawFrame]);
+
+  return (
+    <div className="spotlight-wrapper">
+      {/* ===================================================================
+          GLOBAL CINEMATIC SCROLL-DRIVEN BACKGROUND
+          =================================================================== */}
+      <div className="cinematic-fixed-background">
+        {/* HTML5 Canvas Background */}
+        <canvas 
+          ref={canvasRef} 
+          className="cinematic-canvas"
+        />
+
+        {/* Cinematic Vignette & Ambient Glow Overlays */}
+        <div className="cinematic-vignette"></div>
+        <div className="cinematic-light-glow"></div>
+
+        {/* Floating Side Progress Indicator */}
+        <div className="cinematic-progress-bar">
+          <div 
+            ref={progressFillRef}
+            className="cinematic-progress-fill" 
+            style={{ height: '0%' }}
+          ></div>
+          <span ref={frameCounterRef} className="cinematic-frame-counter">
+            Frame 1/{TOTAL_FRAMES}
+          </span>
         </div>
-    );
+      </div>
+
+      {/* ===================================================================
+          1. CINEMATIC HERO SECTION (Over Cinematic Canvas)
+          =================================================================== */}
+      <section className="cinematic-hero-section">
+        <div className="container">
+          <div className="hero-content-inner">
+            <div className="section-tag">
+              German Language Academy • Live Online
+            </div>
+
+            <h1 className="cinematic-hero-title">
+              Learn German.<br />
+              <span className="gradient-text-gold">Open New Paths.</span>
+            </h1>
+
+            <p className="cinematic-hero-desc">
+              Experience structured German language coaching from A1 to B2. Certified native-level mentors, interactive small batches, and official exam training for higher education and global careers.
+            </p>
+
+            <div className="cinematic-cta-group">
+              <a href="#enroll-now" className="btn btn-gold cinematic-cta-main">
+                <span>Book Free Demo Class</span>
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                  <path d="M4.167 10h11.666M10.833 5l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </a>
+
+              <button 
+                type="button" 
+                className="btn btn-outline-gold"
+                onClick={() => setIsTestOpen(true)}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 11l3 3L22 4"/>
+                  <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                </svg>
+                <span>Check My Level (5 Min)</span>
+              </button>
+            </div>
+
+            <div className="cinematic-trust-strip">
+              <div className="trust-pill-mini">⭐️ 98% Exam Pass Rate</div>
+              <div className="trust-pill-mini">🎓 Goethe, TELC & ÖSD Prep</div>
+              <div className="trust-pill-mini">👥 Small Interactive Batches</div>
+            </div>
+
+            <div className="cinematic-scroll-prompt">
+              <span>↓ Scroll to explore courses & your journey</span>
+              <div className="scroll-chevron-anim"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===================================================================
+          2. THREE PATHWAYS SECTION (Over Cinematic Canvas)
+          =================================================================== */}
+      <section className="pathways-section" id="pathways">
+        <div className="container">
+          <div className="section-header-center">
+            <span className="section-tag">Targeted Roadmaps</span>
+            <h2 className="section-title">Where Do You Want German To Take You?</h2>
+            <p className="section-subtitle">
+              Every learner has a specific destination. We tailor your vocabulary, speaking drills, and exam training to match your real-world goal.
+            </p>
+          </div>
+
+          <div className="pathways-grid">
+            {pathways.map((item) => (
+              <div className="pathway-card glass-card" key={item.id}>
+                <div className="pathway-header">
+                  <span className="pathway-tag">{item.tag}</span>
+                  <span className="pathway-level">{item.level}</span>
+                </div>
+
+                <h3 className="pathway-title">{item.title}</h3>
+                <p className="pathway-desc">{item.desc}</p>
+
+                <ul className="pathway-points">
+                  {item.points.map((pt, i) => (
+                    <li key={i}>
+                      <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                        <circle cx="10" cy="10" r="9" stroke="var(--brand-gold)" strokeWidth="1.5"/>
+                        <path d="M6 10l3 3 5-6" stroke="var(--brand-gold)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      <span>{pt}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <a href="#enroll-now" className="pathway-link">
+                  <span>{item.cta}</span>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===================================================================
+          3. CORE CURRICULUM BENTO SECTION (Over Cinematic Canvas)
+          =================================================================== */}
+      <section className="curriculum-section" id="curriculum">
+        <div className="container">
+          <div className="section-header-center">
+            <span className="section-tag">Comprehensive Levels</span>
+            <h2 className="section-title">Structured German Curriculum (CEFR A1–B2)</h2>
+            <p className="section-subtitle">
+              From foundational phonetics and everyday communication to professional debates and complex grammar.
+            </p>
+          </div>
+
+          <div className="curriculum-grid">
+            {coursesData.map((course) => (
+              <div className="course-card glass-card" key={course.id}>
+                <div className="course-media">
+                  <img src={course.image} alt={course.name} className="course-img" />
+                  <span className={`badge badge-${course.level.toLowerCase()} course-level-badge`}>
+                    {course.level} Level
+                  </span>
+                </div>
+
+                <div className="course-body">
+                  <h3 className="course-name">{course.name}</h3>
+                  <p className="course-desc">{course.description}</p>
+
+                  <div className="course-topics">
+                    <span className="topics-heading">Core Modules:</span>
+                    <div className="topics-tags">
+                      {course.topics.map((t, idx) => (
+                        <span className="topic-pill" key={idx}>{t}</span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="course-outcome-box">
+                    <span className="outcome-label">Expected Outcome:</span>
+                    <p className="outcome-text">{course.outcome}</p>
+                  </div>
+
+                  <div className="course-actions">
+                    <Link to={`/course/${course.id}`} className="btn btn-outline-gold course-btn">
+                      <span>View Syllabus</span>
+                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                        <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                      </svg>
+                    </Link>
+                    <a href="#enroll-now" className="btn btn-gold course-enroll-btn">
+                      Enroll
+                    </a>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="curriculum-footer-cta">
+            <p>Need targeted coaching for Goethe exams, speaking fluency, or healthcare vocabulary?</p>
+            <Link to="/courses" className="btn btn-secondary">
+              View All 6 Specialized Programs &rarr;
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ===================================================================
+          4. OUR TEACHING PILLARS (Over Cinematic Canvas)
+          =================================================================== */}
+      <section className="pillars-section">
+        <div className="container">
+          <div className="pillars-card glass-card">
+            <div className="pillars-intro">
+              <span className="section-tag">The Pro2Deutsch Difference</span>
+              <h2>Why Serious Learners Choose Our Academy</h2>
+              <p>
+                Learning a complex language like German requires more than app drills and pre-recorded videos. We combine rigorous academic structure with encouraging, continuous human mentorship.
+              </p>
+              
+              <div className="pillars-action">
+                <button 
+                  className="btn btn-gold"
+                  onClick={() => setIsTestOpen(true)}
+                >
+                  Test Your German Proficiency Now
+                </button>
+              </div>
+            </div>
+
+            <div className="pillars-grid">
+              {teachingPillars.map((pillar, i) => (
+                <div className="pillar-item" key={i}>
+                  <div className="pillar-num">0{i + 1}</div>
+                  <h4>{pillar.title}</h4>
+                  <p>{pillar.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. INTERACTIVE PROFICIENCY TEST MODAL */}
+      {isTestOpen && (
+        <ProficiencyTest onClose={() => setIsTestOpen(false)} />
+      )}
+    </div>
+  );
 }
 
 export default Spotlight;
