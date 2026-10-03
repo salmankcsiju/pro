@@ -202,3 +202,13 @@
   .pathway-card, .course-card, .feature-item { transition: none; }
   .pathway-card:hover, .course-card:hover, .feature-item:hover { transform: none; }
 }
+
+
+.features-section .section-header-center {
+  max-width: 650px;
+  margin: 0 auto 44px 0;
+  text-align: left;
+}
+@media (max-width: 768px) {
+  .features-section .section-header-center { margin: 0 0 32px; }
+}
